@@ -23,41 +23,57 @@
 }());
 
 
+//change the text_box for the player turn; 
+setInterval(function () {
+	if (player1) {
+		var get_elementplayer = document.getElementById("player_turn"); 
+		get_elementplayer.innerHTML = "PLAYER 1 TURN"; 
+		get_elementplayer.style.color = "blue"; 
+	}else {
+		var get_elementplayer = document.getElementById("player_turn"); 
+		get_elementplayer.innerHTML = "PLAYER 2 TURN "; 
+		get_elementplayer.style.color = "red"; 
+	}
+}, 1000/60)
+
+
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 ctx.lineCap = "round";
 
-// variable to hold how many frames have elapsed in the animation
-var t = 1;
+var player1 = true; 
+var player2 = false; 
 
-// define the path to plot
-var vertices = [];
-vertices.push({
+// variable to hold how many frames have elapsed in the animation
+// t for checking how  many frames elapsed in player1 j for player2
+var t = 1;
+var n = 1; 
+
+// define the path to plot for player 1
+var player1_vertices = [];
+player1_vertices.push({
     x: 0,
     y: 0
 });
 
+// define the path to plot for player 2
+var player2_vertices = [];
+player2_vertices.push({
+    x: canvas.width,
+    y: canvas.height
+});
 
+console.log(player2_vertices); 
 
 // draw the complete line
 ctx.lineWidth = 1;
-// tell canvas you are beginning a new path
-ctx.beginPath();
-// draw the path with moveTo and multiple lineTo's
-ctx.moveTo(0, 0);
-ctx.lineTo(300, 100);
-ctx.lineTo(80, 200);
-ctx.lineTo(10, 100);
-ctx.lineTo(0, 0);
-// stroke the path
-ctx.stroke();
-
 
 // set some style
 ctx.lineWidth = 5;
-ctx.strokeStyle = "blue";
-// calculate incremental points along the path
-var points = calcWaypoints(vertices);
+
+// calculate small incremental points along the path for player 1 and player 2
+var points_player1 = calcWaypoints(player1_vertices);
+var points_player2 = calcWaypoints(player2_vertices);
 
 // calc waypoints traveling along vertices
 function calcWaypoints(vertices) {
@@ -81,32 +97,52 @@ function calcWaypoints(vertices) {
 }
 
 
-function animate() {
-    if (t < points.length - 1) {
-        var myreq = requestAnimationFrame(animate);
-    }
+// animate line for player1 when they play (line color blue for player1) 
+function animate_player1() {
+	ctx.strokeStyle = "blue";
+    if (t < points_player1.length - 1) {
+        var myreq = requestAnimationFrame(animate_player1);
+    } else {
+		//when the line animation finishes, it's player2 turn
+		player2 = true; 
+		player1 = false; 
+	}
 
     // draw a line segment from the last waypoint
     // to the current waypoint
-    ctx.beginPath();
-    ctx.moveTo(points[t - 1].x, points[t - 1].y);
-    ctx.lineTo(points[t].x, points[t].y);
+	ctx.beginPath(); 
+    ctx.lineTo(points_player1[t].x, points_player1[t].y);
     ctx.stroke();
     // increment "t" to get the next waypoint
     t++;
-
+	
 	console.log(t); 
+}
+
+// animate line for player1 when they play (line color red for player2) 
+function animate_player2() {
+	ctx.strokeStyle = "red";
+    if (n < points_player2.length - 1) {
+        var myreq_player2 = requestAnimationFrame(animate_player2);
+    } else {
+		player1 = true; 
+		player2 = false; 
+	}
+
+    // draw a line segment from the last waypoint
+    // to the current waypoint
+   
+	ctx.beginPath(); 
+    ctx.lineTo(points_player2[n].x, points_player2[n].y);
+    ctx.stroke();
+    // increment "t" to get the next waypoint
+    n++;
+
+	console.log(n); 
 }
 
 
 
-//function writemessage (canvas, message) {
-//	var context = canvas.getContext('2d'); 
-//	context.clearRect(0, 0, canvas.width, canvas.height);
-//	context.font = '18pt Calibri';
-//	context.fillStye = 'black'; 
-//	context.fillText(message, 10, 25); 
-//}
 function getMousepos(canvas, evt) {
 	var rect = canvas.getBoundingClientRect(); 
 	return {
@@ -116,17 +152,42 @@ function getMousepos(canvas, evt) {
 }
 
 
+// for testing purpuse click 'a' == 65 to color in the area 
+document.addEventListener("keydown", keyDownTextField, false)
+
+
+function keyDownTextField (e) {
+	var keyCode = e.keyCode; 
+	if (keyCode == 65) {
+		ctx.fillstyle = "lightgrey"; 
+		ctx.fill(); 
+	}
+}
+
+
 canvas.addEventListener('click', function (evt) {
 	
-	var mousePos = getMousepos(canvas, evt);
-	vertices.push({
-		x: mousePos.x,
-		y: mousePos.y 
-	});
-	points = calcWaypoints(vertices); 
-	
-	// extend the line from start to finish with animation
-	animate(); 
+	if (player1) {
+		var mousePos = getMousepos(canvas, evt);
+		player1_vertices.push({
+			x: mousePos.x,
+			y: mousePos.y 
+		});
+		points_player1 = calcWaypoints(player1_vertices); 
+		
+		// extend the line from start to finish with animation
+		animate_player1();
+	} else {
+		var mousePos = getMousepos(canvas, evt);
+		player2_vertices.push({
+			x: mousePos.x,
+			y: mousePos.y 
+		});
+		points_player2 = calcWaypoints(player2_vertices); 
+		console.log(points_player2);
+		// extend the line from start to finish with animation
+		animate_player2();
+	}
 	
 }, false); 
 
