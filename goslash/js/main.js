@@ -65,15 +65,49 @@ player2_vertices.push({
 
 console.log(player2_vertices); 
 
-// draw the complete line
-ctx.lineWidth = 1;
+
 
 // set some style
-ctx.lineWidth = 5;
+ctx.lineWidth = 8;
 
 // calculate small incremental points along the path for player 1 and player 2
 var points_player1 = calcWaypoints(player1_vertices);
 var points_player2 = calcWaypoints(player2_vertices);
+
+
+
+// Returns 1 if the lines intersect, otherwise 0. In addition, if the lines 
+// intersect the intersection point may be stored in the floats i_x and i_y.
+var i_x; 
+var i_y; 
+
+function get_line_intersection(p0_x, p0_y, p1_x, p1_y, 
+    p2_x, p2_y, p3_x, p3_y)
+{
+    var s1_x, s1_y, s2_x, s2_y;
+    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
+    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
+
+    var s, t;
+    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+    {
+        // Collision detected
+        i_x = p0_x + (t * s1_x);
+        i_y = p0_y + (t * s1_y);
+        return 1;
+    }
+
+    return 0; // No collision
+}
+
+console.log (get_line_intersection(0,0,100,100,30,25,100,100)); 
+console.log(i_x, i_y); 
+
+
+
 
 // calc waypoints traveling along vertices
 function calcWaypoints(vertices) {
@@ -111,6 +145,7 @@ function animate_player1() {
     // draw a line segment from the last waypoint
     // to the current waypoint
 	ctx.beginPath(); 
+	ctx.moveTo(points_player1[t - 1].x, points_player1[t - 1].y);
     ctx.lineTo(points_player1[t].x, points_player1[t].y);
     ctx.stroke();
     // increment "t" to get the next waypoint
@@ -133,6 +168,7 @@ function animate_player2() {
     // to the current waypoint
    
 	ctx.beginPath(); 
+	ctx.moveTo(points_player2[n - 1].x, points_player2[n - 1].y);
     ctx.lineTo(points_player2[n].x, points_player2[n].y);
     ctx.stroke();
     // increment "t" to get the next waypoint
@@ -153,13 +189,30 @@ function getMousepos(canvas, evt) {
 
 
 // for testing purpuse click 'a' == 65 to color in the area 
-document.addEventListener("keydown", keyDownTextField, false)
+document.addEventListener("keydown", keyDownTextField, false); 
 
 
 function keyDownTextField (e) {
-	var keyCode = e.keyCode; 
+	var keyCode = e.keyCode;
 	if (keyCode == 65) {
-		ctx.fillstyle = "lightgrey"; 
+		ctx.beginPath(); 
+		for (var k = 0; k < player1_vertices.length; k++) {
+		console.log(player1_vertices); 
+		ctx.lineTo(player1_vertices[k].x, player1_vertices[k].y);
+		// increment "t" to get the next waypoint
+			
+		}
+
+		ctx.fillStyle = "blue"; 
+		ctx.fill(); 
+	} else if (keyCode == 69) {
+		ctx.beginPath(); 
+		for (var vert2 = 0; vert2 < player1_vertices.length; vert2++) { 
+		ctx.lineTo(player2_vertices[vert2].x, player2_vertices[vert2].y);
+		// increment "t" to get the next waypoint
+			
+		}
+		ctx.fillStyle = "red"; 
 		ctx.fill(); 
 	}
 }
