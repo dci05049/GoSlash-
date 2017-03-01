@@ -22,6 +22,13 @@
     };
 }());
 
+var list =[]; 
+
+list.push({x: 5, y: 6}); 
+list.push({x: 5, y: 6}); 
+console.log(list); 
+
+
 
 function Game () {
 	
@@ -68,8 +75,25 @@ function Game () {
 			get_elementplayer.innerHTML = "PLAYER 2 TURN "; 
 			get_elementplayer.style.color = "red"; 
 		}
+		
+		draw_area (); 
+		
 	}, 1000/60)
+	
+	
+	// finshed here (february 28, 2017); 
+	function draw_area () {
+		ctx.beginPath(); 
+		for (var vert2 = 0; vert2 < play1_lst_interpoints.length; vert2++) { 
+			ctx.lineTo(play1_lst_interpoints[vert2].inter_x, play1_lst_interpoints[vert2].inter_y);
+			// increment "t" to get the next waypoint
+				
+		}
 
+		ctx.fillStyle = "blue"; 
+		ctx.fill(); 
+	}
+	
 	
 	// input start x y coodrinate of first point of each 
 	// line and the end point of each line and produces the intersection point in [x,y], returns 0 if there is no collision. 
@@ -126,6 +150,7 @@ function Game () {
 
 	// animate line for player1 when they play (line color blue for player1) 
 	function animate_player1() {
+		counter = 0; 
 		ctx.strokeStyle = "blue";
 		if (t < points_player1.length - 1) {
 			var myreq = requestAnimationFrame(animate_player1);
@@ -135,24 +160,30 @@ function Game () {
 			player1 = false; 
 		}
 		
+		
+		// intersection points
 		var poi = {
 			inter_x: null,
 			inter_y: null 
 		}
 		// draw a line segment from the last waypoint
-		// to the current waypoint
+		// to the current waypoint. 
+		
+		// calculate the intersection points between the small increments and all the connected lines. 
 		for (var vert = 0; vert < player1_vertices.length - 2; ++vert) {
-			poi = get_line_intersection(current_vert.x, current_vert.y, points_player1[t-1].x, points_player1[t-1].y, 
+			poi = get_line_intersection(points_player1[t-1].x, points_player1[t-1].y, points_player1[t].x, points_player1[t].y, 
 			player1_vertices[vert].x, player1_vertices[vert].y, player1_vertices[vert+1].x, player1_vertices[vert+1].y);
+			
+				// add the intersection points if the points are not null 
+			if (poi.inter_x != null && poi.inter_y != null && counter === 0) {
+				if (play1_lst_interpoints.length === 0) {
+					play1_lst_interpoints.push(poi);
+				} else if (play1_lst_interpoints[play1_lst_interpoints.length - 1].inter_x != poi.inter_x) {
+					play1_lst_interpoints.push(poi);
+				}
+			}; 
 		}
 		
-		if (poi.inter_x != null && poi.inter_y != null 
-		&& poi.inter_x != play1_lst_interpoints[play1_lst_interpoints.length - 1].x) {
-			play1_lst_interpoints.push({
-				x: poi.x,
-				y: poi.y 
-			});
-		};
 		
 		ctx.beginPath(); 
 		ctx.moveTo(points_player1[t - 1].x, points_player1[t - 1].y);
@@ -203,9 +234,9 @@ function Game () {
 		var keyCode = e.keyCode;
 		if (keyCode == 65) {
 			ctx.beginPath(); 
-			for (var k = 0; k < play1_lst_interpoints.length; k++) {
-			ctx.lineTo(play1_lst_interpoints[k].x, play1_lst_interpoints[k].y);
-			// increment "t" to get the next waypoint
+			for (var vert2 = 0; vert2 < play1_lst_interpoints.length; vert2++) { 
+				ctx.lineTo(play1_lst_interpoints[vert2].inter_x, play1_lst_interpoints[vert2].inter_y);
+				// increment "t" to get the next waypoint
 				
 			}
 
@@ -214,8 +245,8 @@ function Game () {
 		} else if (keyCode == 69) {
 			ctx.beginPath(); 
 			for (var vert2 = 0; vert2 < player1_vertices.length; vert2++) { 
-			ctx.lineTo(player2_vertices[vert2].x, player2_vertices[vert2].y);
-			// increment "t" to get the next waypoint
+				ctx.lineTo(player2_vertices[vert2].x, player2_vertices[vert2].y);
+				// increment "t" to get the next waypoint
 				
 			}
 			ctx.fillStyle = "red"; 
