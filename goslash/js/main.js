@@ -76,6 +76,14 @@ function Game () {
 			get_elementplayer.style.color = "red"; 
 		}
 		
+		for (var k = 0; k < player1_vertices.length; k++) {
+			ctx.beginPath(); 
+			ctx.strokeStyle = "red"; 
+			ctx.arc(player1_vertices[k].x, player1_vertices[k].y, 3, 0, 2*Math.PI); 
+			ctx.stroke();
+		}
+		
+		
 		draw_area (); 
 		
 	}, 1000/60)
@@ -150,8 +158,8 @@ function Game () {
 
 	// animate line for player1 when they play (line color blue for player1) 
 	function animate_player1() {
-		counter = 0; 
 		ctx.strokeStyle = "blue";
+		counter = 0;
 		if (t < points_player1.length - 1) {
 			var myreq = requestAnimationFrame(animate_player1);
 		} else {
